@@ -1,0 +1,125 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Параметры
+h = 1e-6  # шаг по времени, 1 мкс
+length = 200  # количество точек для моделирования (примерно 100 мс)
+
+# Генерация различных сигналов
+def generate_signals(length):
+    signals = np.zeros((4, length))
+
+    for i in range(length):
+        # Сигнал X1: Частые импульсы (период 5)
+        if (i % 5) < 3:
+            signals[0, i] = 1
+        # Сигнал X2: Менее частые импульсы (период 15)
+        if (i % 10) < 5:
+            signals[1, i] = 1
+        # Сигнал X3: Ещё реже (период 30)
+        if (i % 20) < 10:
+            signals[2, i] = 1
+        # Сигнал X4: Самый редкий (период 60)
+        if (i % 40) < 20:
+            signals[3, i] = 1
+
+    return signals
+
+# Основной код
+if __name__ == "__main__":
+    # Генерация сигналов
+    signals = generate_signals(length)
+
+    # Создание временной оси
+    time = np.arange(length) * h
+    plt.figure(figsize=(12, 10))
+
+    # Отображение сигналов X1, X2, X3, X4
+    for i in range(4):
+        plt.subplot(8, 1, i + 1)
+        plt.step(time, 1 - signals[i], label=f'Signal X{i+1}', where='post')
+        plt.ylim(-0.1, 1.1)
+        plt.xlim(0, (length - 1) * h)
+        plt.title(f'Input Signal X{i+1}')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Signal Value')
+        plt.grid()
+        plt.legend()
+
+    # Параметры для сигнала A1
+    period_a1 = 60  # Период повторения A1
+    duration_a1 = 40  # Длительность A1
+    a1 = np.zeros(length)
+
+    # Генерация повторяющегося сигнала A1
+    for i in range(0, length, period_a1):
+      a1[i:i + duration_a1] = 1  # Устанавливаем амплитуду A1 на 1
+
+     # Генерация повторяющегося сигнала A1, начиная с 1
+    a1[0:duration_a1] = 1  # Устанавливаем амплитуду A1 на 1 в начале
+    for i in range(period_a1, length, period_a1):
+      if i < length:  # Убедимся, что индекс не выходит за пределы
+        a1[i:i + duration_a1] = 1  # Устанавливаем амплитуду A1 на 1
+
+
+    # Создание сигнала A2
+    a2 = np.zeros(length)
+    start_a2 = start_a1 + duration_a1
+    duration_a2 = 80
+
+    if start_a2 + duration_a2 <= length:
+        a2[start_a2:start_a2 + duration_a2] = 1
+
+   # Отображение сигнала A1
+    plt.subplot(8, 1, 6)
+    plt.step(time, a1, label='Signal A1', where='post', color='orange')  # Отображение без инвертирования
+    plt.ylim(-0.1, 1.1)  # Установка пределов по оси Y
+    plt.xlim(0, (length - 1) * h)
+    plt.title('Repeating Signal A1')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Signal Value')
+    plt.grid()
+    plt.legend()
+
+
+    # Отображение сигнала A2
+    plt.subplot(8, 1, 7)
+    plt.step(time, a2, label='Signal A2', where='post', color='green')
+    plt.ylim(-0.1, 1.1)
+    plt.xlim(0, (length - 1) * h)
+    plt.title('Selection Signal A2 (Starts After A1)')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Signal Value')
+    plt.grid()
+    plt.legend()
+
+    # Моделирование выходного сигнала F
+    F = np.zeros(length)
+
+    for i in range(length):
+        # Определяем значение выходного сигнала F на основе управляющих сигналов a1 и a2
+        if a1[i] == 0 and a2[i] == 0:
+            F[i] = signals[0, i]  # X1
+        elif a1[i] == 0 and a2[i] == 1:
+            F[i] = signals[1, i]  # X2
+        elif a1[i] == 1 and a2[i] == 0:
+            F[i] = signals[2, i]  # X3
+        elif a1[i] == 1 and a2[i] == 1:
+            F[i] = signals[3, i]  # X4
+
+    # Отображение выходного сигнала F
+    plt.subplot(8, 1, 8)
+    plt.step(time, F, label='Output Signal F', where='post', color='purple')
+    plt.ylim(-0.1, 1.1)
+    plt.xlim(0, (length - 1) * h)
+    plt.title('Output Signal F (Based on Multiplexer Logic)')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Signal Value')
+    plt.grid()
+    plt.legend()
+
+    # Подгонка макета графиков
+    plt.tight_layout()
+
+    # Показ графиков
+    plt.show()
