@@ -47,25 +47,32 @@ if __name__ == "__main__":
         plt.legend()
 
     # Параметры для сигнала A1
-    period_a1 = 60  # Период повторения A1
+    start_a1 = 40  # Начало A1 (например, в 30 мкс)
     duration_a1 = 40  # Длительность A1
+    amplitude_a1 = 1  # Амплитуда A1 (например, 0.8)
     a1 = np.zeros(length)
 
-    # Генерация повторяющегося сигнала A1
-    for i in range(0, length, period_a1):
-      a1[i:i + duration_a1] = 1  # Устанавливаем амплитуду A1 на 1
+# Генерация сигнала A1
+    if start_a1 + duration_a1 <= length:
+      a1[start_a1:start_a1 + duration_a1] = amplitude_a1  # Устанавливаем амплитуду A1
 
-     # Генерация повторяющегося сигнала A1, начиная с 1
-    a1[0:duration_a1] = 1  # Устанавливаем амплитуду A1 на 1 в начале
-    for i in range(period_a1, length, period_a1):
-      if i < length:  # Убедимся, что индекс не выходит за пределы
-        a1[i:i + duration_a1] = 1  # Устанавливаем амплитуду A1 на 1
+# Отображение сигнала A1
+    plt.subplot(8, 1, 6)
+    plt.step(time, a1, label='Signal A1', where='post', color='orange')
+    plt.ylim(-0.1, 1.1)  # Установка пределов по оси Y
+    plt.xlim(0, (length - 1) * h)
+    plt.title('Selection Signal A1')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Signal Value')
+    plt.grid()
+    plt.legend()
+
 
 
     # Создание сигнала A2
     a2 = np.zeros(length)
     start_a2 = start_a1 + duration_a1
-    duration_a2 = 80
+    duration_a2 = 90
 
     if start_a2 + duration_a2 <= length:
         a2[start_a2:start_a2 + duration_a2] = 1
